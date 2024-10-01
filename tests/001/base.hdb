@@ -1,0 +1,67 @@
+// name and types
+(
+    (
+        (
+            zzz
+        )
+    ),
+    zzz: _,
+    .a: _,
+    b: _,
+    c: (
+        .d: (
+            .dd: _
+        ),
+        e: (
+            .ee: _
+        )
+    ),
+    _f: (
+        .g: (
+            .gg: _
+        ),
+        h: (
+            .hh: _
+        )
+    ),
+    .i: (
+        .j: (
+            jj: _
+        ),
+        k: _
+    ),
+    (
+        a,
+        b,
+        c,
+        c.d,
+        c.d.dd,
+        c.e,
+        c.e.ee,
+        _f,
+        _f.g,
+        _f.g.gg,
+        _f.h,
+        _f.h.hh,
+        i.j,
+        i.j.jj,
+        i.k
+    ),
+    .int: <-10,10>,
+    .types: (
+        .real: <-99, 99>
+    ),
+    _g2: (
+        complex: <0, 11>,
+        .bool: <0, 1>
+    ),
+    .i1: int[9],
+    .r1: types.real[8],
+    .c1: _g2.complex[1],
+    .b1: _g2.bool[1],
+    $,
+    $int,
+    $types.real,
+    $_g2.complex,
+    $_g2.bool
+)
