@@ -845,7 +845,7 @@ void HarmonyObject::findPath(HarmonyObject *start)
     list<HarmonyItem *> path;
     list<HarmonyItem *> start_path;
 
-    PF("%p:%p -> %p:%p", start, start->sweep_parent, this, sweep_parent);
+    // PF("%p:%p -> %p:%p", start, start->sweep_parent, this, sweep_parent);
     HarmonyItem *i;
 
     assert(this);
@@ -959,9 +959,11 @@ string HarmonyObject::getPath(HarmonyObject *start)
         if ((*pit)->object == (*spit)->object) {
             auto it = spit;
             it++;
-            for (; it != start_path.end(); it++) {
-                if ((*pit)->label == (*it)->label)
-                    goto out;
+            if (!(*pit)->label.empty()) {
+                for (; it != start_path.end(); it++) {
+                    if ((*pit)->label == (*it)->label)
+                        goto out;
+                }
             }
             // PF("same");
             local_root = *pit;
@@ -1041,30 +1043,6 @@ out0:
             spath = spath + string(".") + l;
     }
     return spath;
-    // HarmonyObject *o;
-    // HarmonyItem *i;
-    // string path;
-
-    // if (!global_name.empty())
-    //     return global_name;
-    // o = this;
-    // for (i = sweep_parent; i; i = i->parent->sweep_parent) {
-    //     if (i->label.empty()) {
-    //         path = o->getGlobalName() + path;
-    //         break;
-    //     }
-    //     path = string(".") + i->label + path;
-    //     if (!i->parent->global_name.empty()) {
-    //         path = i->parent->global_name + path;
-
-    //         break;
-    //     }
-    //     o = i->parent;
-    // }
-    // if (path.empty())
-    //     return string(".");
-    // path += " " + getKey();
-    // return path;
 }
 
 void HarmonyObject::copy(HarmonyObject *source)

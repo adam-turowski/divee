@@ -171,7 +171,7 @@ void hdbIterate(HarmonyDB *db, struct HdbObject *object, bool isroot = false)
             // PF("ADD REL");
             object->harmony_object->addRelation(r, !it->temporary ? it->label: string());
         } else {
-            PF("[%s]%d: %p", it->label.c_str(), it->temporary, it->harmony_object);
+            // PF("[%s]%d: %p", it->label.c_str(), it->temporary, it->harmony_object);
             auto i = object->harmony_object->add(it->harmony_object, !it->temporary ? it->label: string(), true); // make structural and primary
         }
     }
