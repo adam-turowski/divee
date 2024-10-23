@@ -98,14 +98,14 @@ struct HarmonyObject {
         ELEMENT,
         TYPE,
         PROXY,
-        MATCH,          // ? (pattern, where, unknowns, negatives, [cont])
+        MATCH,          // ? (pattern, unknowns, negatives, [cont])
         CREATE,         // * (dest - must be proxy)
         ASSIGN,         // = (dest - must be proxy, src)
         ADD,            // + (set, object)
         REMOVE,         // - (set, object)
         LAUNCH,         // ! (arg, body)
         RECEIVE,        // < (arg)
-        SEND,           // > (recipient, arg) can be parallelized
+        SEND,           // > (recipient, arg) can be parallelized, () to stop
         LINK,           // ^ (dest, [src]) ?, might be replaced by relation proxy
         RELATE,         // ~
         PATTERN         // pattern relation
@@ -147,6 +147,7 @@ struct HarmonyObject {
     HarmonyItem * first();
     HarmonyItem * last();
     HarmonyItem * next(HarmonyObject *object);
+    HarmonyItem * prev(HarmonyObject *object);
     HarmonyItem * add(HarmonyObject *object, string label = string(), bool primary = false);
     HarmonyItem * remove(HarmonyItem *item, bool internal = false);
     HarmonyItem * findItem(const string &label);

@@ -377,6 +377,17 @@ HarmonyItem * HarmonyObject::next(HarmonyObject *object)
     return NULL;
 }
 
+HarmonyItem * HarmonyObject::prev(HarmonyObject *object)
+{
+    auto o = last();
+    for (; o != NULL; o = o->previousItem(this)) {
+        if (o->object == object) {
+            return o->previousItem(this);
+        }
+    }
+    return NULL;
+}
+
 void HarmonyObject::updateDistance(HarmonyObject *start, HarmonyObject * parent_root_distance)
 {
     HarmonyObjectReference *ref;

@@ -137,15 +137,12 @@ again:
             const char codes[] = "_ETP?*=+-!<>^~";
             PT("Code: %c", codes[current_ip->type]);
             if (current_ip->type == HarmonyObject::Type::MATCH) {
-                HarmonyObject *pattern, *where, *unknowns, *negatives, *cont;
+                HarmonyObject *pattern, *unknowns, *negatives, *cont;
 
                 auto pattern_item = current_ip->first();
                 pattern = pattern_item->object;
 
-                auto where_item = pattern_item->nextItem(current_ip);
-                where = where_item->object;
-
-                auto unknowns_item = where_item->nextItem(current_ip);
+                auto unknowns_item = pattern_item->nextItem(current_ip);
                 unknowns = unknowns_item->object;
 
                 auto negatives_item = unknowns_item->nextItem(current_ip);
@@ -156,14 +153,15 @@ again:
                 if (cont_item) {
                     cont = cont_item->object;
                 }
-                auto b = execute_match(pattern, where, unknowns, negatives);
+                auto b = execute_match(pattern, unknowns, negatives);
                 PT("b:%d  cont:%p", b, cont);
                 if (!cont && !b) {
                     assertf(0, "MATCH NOT MET!");
                 }
                 if (cont && b) {
-                    if (pushFrame(cont->getObject()))
+                    if (pushFrame(ip->getObject()) && pushFrame(cont->getObject())) {
                         continue;
+                    }
                     break;
                 }
             } else if (current_ip->type == HarmonyObject::Type::CREATE) {
@@ -186,9 +184,9 @@ again:
                 auto src_item = dest_item->nextItem(current_ip);
                 assert(src_item);
                 src = src_item->object->getObject();
-                PT("%p:%ld -> %p:%ld", src, src->element_value, dest->getObject(), dest->getObject()->element_value);
+                // PT("%p:%ld -> %p:%ld", src, src->element_value, dest->getObject(), dest->getObject()->element_value);
                 dest->getObject()->copy(src);
-                PT("%p:%ld -> %p:%ld", src, src->element_value, dest->getObject(), dest->getObject()->element_value);
+                // PT("%p:%ld -> %p:%ld", src, src->element_value, dest->getObject(), dest->getObject()->element_value);
             } else if (current_ip->type == HarmonyObject::Type::ADD) {
                 HarmonyObject *set, *object;
 
@@ -386,9 +384,9 @@ again:
     PT("Done");
 }
 
-bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *where, HarmonyObject *unknowns, HarmonyObject *negatives)
+bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *unknowns, HarmonyObject *negatives)
 {
-    PT("MATCH %p:%d  %p:%d  %p:%d  %p:%d", pattern, pattern->isEmpty(), where, where->isEmpty(), unknowns, unknowns->isEmpty(), negatives, negatives->isEmpty());
+    PT("MATCH %p:%d  %p:%d  %p:%d", pattern, pattern->isEmpty(), unknowns, unknowns->isEmpty(), negatives, negatives->isEmpty());
 
     // db->dumpBase();
 
@@ -441,7 +439,12 @@ bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *where
                         p->destination.object->link(no);
                     }
                 } else {
-                    return false;
+                    auto ni = t->prev(o);
+                    if (!ni)
+                        return false;
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        p->destination.object->link(ni->object->getObject());
+                    }
                 }
             } else if (p->relation.object == relation_next) {
                 auto o = p->source.object->getObject();
@@ -458,6 +461,67 @@ bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *where
                         no->element_type.setReference(t);
                         no->element_value = o->element_value + 1;
                         p->destination.object->link(no);
+                    }
+                } else {
+                    auto ni = t->next(o);
+                    if (!ni)
+                        return false;
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        p->destination.object->link(ni->object->getObject());
+                    }
+                }
+            } else if (p->relation.object == relation_first) {
+                auto o = p->source.object->getObject();
+                auto t = p->pattern_owner.object->getObject();
+                PT("Relation FIRST %p %p %p", p->source.object, o, t);
+                if (o->isElement() && t->isType()) {
+                    assert(o->element_type.object == t);
+                    if (o->element_value == t->type_lower)
+                        return false;
+                    if (p->destination.object->negative)
+                        return false;
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        auto no = new HarmonyObject(HarmonyObject::ELEMENT);
+                        no->element_type.setReference(t);
+                        no->element_value = t->type_lower;
+                        PT("linking %p to %p %ld", p->destination.object, no, no->element_value);
+                        p->destination.object->link(no);
+                    }
+                } else if (o == t) {
+                    auto fi = o->first();
+                    if (p->destination.object->negative) {
+                        return fi == NULL;
+                    }
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        p->destination.object->link(fi->object->getObject());
+                    }
+                } else {
+                    return false;
+                }
+            } else if (p->relation.object == relation_last) {
+                auto o = p->source.object->getObject();
+                auto t = p->pattern_owner.object->getObject();
+                PT("Relation LAST %p %p %p", p->source.object, o, t);
+                if (o->isElement() && t->isType()) {
+                    assert(o->element_type.object == t);
+                    if (o->element_value == t->type_higher)
+                        return false;
+                    if (p->destination.object->negative)
+                        return false;
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        auto no = new HarmonyObject(HarmonyObject::ELEMENT);
+                        no->element_type.setReference(t);
+                        no->element_value = t->type_higher;
+                        PT("linking %p to %p %ld", p->destination.object, no, no->element_value);
+                        p->destination.object->link(no);
+                    }
+                } else if (o == t) {
+                    auto fi = o->last();
+                    if (p->destination.object->negative) {
+                        return fi == NULL;
+                    }
+                    if (p->destination.object->unknown && p->destination.object->isProxy()) {
+                        p->destination.object->link(fi->object->getObject());
                     }
                 } else {
                     return false;

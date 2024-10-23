@@ -23,7 +23,7 @@ struct ExecutionEngine
     void run();
 
     bool pushFrame(HarmonyObject *frame);
-    bool execute_match(HarmonyObject *pattern, HarmonyObject *where, HarmonyObject *unknowns, HarmonyObject *negatives);
+    bool execute_match(HarmonyObject *pattern, HarmonyObject *unknowns, HarmonyObject *negatives);
 };
 
 #endif
