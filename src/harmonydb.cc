@@ -983,6 +983,12 @@ string HarmonyObject::getPath(HarmonyObject *start)
         }
         break;
     }
+    // for (auto pit2 = pit; pit2 != path.end(); pit2++) {
+    //     PF("pit2 %p [%s]", *pit2, (*pit2)->label.c_str());
+    // }
+    // for (auto spit2 = spit; spit2 != start_path.end(); spit2++) {
+    //     PF("spit2 %p [%s]", *spit2, (*spit2)->label.c_str());
+    // }
 out:
     // PF("local_root %p", local_root);
     // for (i = sweep_parent; i && i != local_root; i = i->parent->sweep_parent) {
@@ -1016,7 +1022,7 @@ restart:
                     p = (*spit3)->label;
 
                 // printf("[%s]<->[%s]\n", l.c_str(), p.c_str());
-                if (l == p && (*pit3)->object != (*spit3)->object) {
+                if (!l.empty() && !p.empty() && l == p && (*pit3)->object != (*spit3)->object) {
                     // printf("Found\n");
                     pit--;
                     spit--;
@@ -1030,7 +1036,7 @@ restart:
                         local_root = NULL;
                     else
                         local_root = *ppit;
-                    printf("Restart\n");
+                    // printf("Restart\n");
                     goto restart;
                 }
                 pit3++;
@@ -1754,7 +1760,7 @@ void HarmonyDB::copyArgument(HarmonyObject *source, HarmonyObject *named, Harmon
             }
         } else if (unnamed) {
             // PF("[%s]", i->label.c_str());
-            unnamed->add(cloneArgument(i->object), i->label);
+            unnamed->add(cloneArgument(i->object->getObject()), i->label);
         }
     }
     if (return_object) {

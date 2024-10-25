@@ -5,7 +5,7 @@ project(Divee VERSION 1)
 find_package(FLEX)
 find_package(BISON)
 
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall -g")
 
 flex_target(HdbScanner hdb.ll ${CMAKE_CURRENT_BINARY_DIR}/hdb_scanner.cc)
 bison_target(HdbParser hdb.yy ${CMAKE_CURRENT_BINARY_DIR}/hdb_parser.cc DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/hdb_parser.h)

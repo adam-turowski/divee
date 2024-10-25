@@ -104,6 +104,7 @@ bool ExecutionEngine::pushFrame(HarmonyObject *frame)
                         // PT("removing %p", si->object);
                         si = ip_stack->remove(si);
                     }
+                    ip->link(frame->first()->object);
                     return true;
                 }
             }
@@ -194,9 +195,12 @@ again:
 
                 auto set_item = current_ip->first();
                 set = set_item->object->getObject();
+                assert(set);
 
                 auto object_item = set_item->nextItem(current_ip);
                 object = object_item->object->getObject();
+                assert(object);
+
                 set->add(object);
             } else if (current_ip->type == HarmonyObject::Type::REMOVE) {
                 HarmonyObject *set, *object;
@@ -329,8 +333,10 @@ again:
 
         } else { // HarmonyObject, step into
             PT("Step into %p", ip->getObject());
-            if (pushFrame(ip->getObject()))
+            if (pushFrame(ip->getObject())) {
+                PT("Pushing");
                 continue;
+            }
             break;
         }
         // next instruction
@@ -464,7 +470,7 @@ bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *unkno
                     }
                 } else {
                     auto ni = t->next(o);
-                    if (!ni)
+                    if (p->destination.object->negative == !ni)
                         return false;
                     if (p->destination.object->unknown && p->destination.object->isProxy()) {
                         p->destination.object->link(ni->object->getObject());
@@ -489,11 +495,11 @@ bool ExecutionEngine::execute_match(HarmonyObject *pattern, HarmonyObject *unkno
                     }
                 } else if (o == t) {
                     auto fi = o->first();
-                    if (p->destination.object->negative) {
-                        return fi == NULL;
-                    }
                     if (p->destination.object->unknown && p->destination.object->isProxy()) {
                         p->destination.object->link(fi->object->getObject());
+                    }
+                    if (p->destination.object->negative) {
+                        return fi == NULL;
                     }
                 } else {
                     return false;
